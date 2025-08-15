@@ -104,15 +104,20 @@ end
 function NamesOnDiscord_CheckGroupMembers()
     NamesOnDiscord_knownPlayers = json.decode( UnitXP( "clientRead", "http://192.168.0.6:5261/api/voice/members/1225934997836402772" ) )
     local unknownMembers = {}
+    local groupMembers = {}
 
+    -- Collect normalized group member names
     if IsInRaid() then
         for i = 1, GetNumRaidMembers() do
             local unit = "raid" .. i
             if UnitIsPlayer(unit) then
                 local name = GetUnitName(unit, true)
-                if name and not NamesOnDiscord_IsKnown(name) then
-                    local class = UnitClass(unit)
-                    table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(name, class))
+                if name then
+                    table.insert(groupMembers, NormalizeName(name))
+                    if not NamesOnDiscord_IsKnown(name) then
+                        local class = UnitClass(unit)
+                        table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(name, class))
+                    end
                 end
             end
         end
@@ -121,38 +126,76 @@ function NamesOnDiscord_CheckGroupMembers()
             local unit = "party" .. i
             if UnitIsPlayer(unit) then
                 local name = GetUnitName(unit, true)
-                if name and not NamesOnDiscord_IsKnown(name) then
-                    local class = UnitClass(unit)
-                    table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(name, class))
+                if name then
+                    table.insert(groupMembers, NormalizeName(name))
+                    if not NamesOnDiscord_IsKnown(name) then
+                        local class = UnitClass(unit)
+                        table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(name, class))
+                    end
                 end
             end
         end
 
         local playerName = UnitName("player")
-        if playerName and not NamesOnDiscord_IsKnown(playerName) then
-            local class = UnitClass("player")
-            table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(playerName, class))
+        if playerName then
+            table.insert(groupMembers, NormalizeName(playerName))
+            if not NamesOnDiscord_IsKnown(playerName) then
+                local class = UnitClass("player")
+                table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(playerName, class))
+            end
         end
     else
         local playerName = UnitName("player")
-        if playerName and not NamesOnDiscord_IsKnown(playerName) then
-            local class = UnitClass("player")
-            table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(playerName, class))
+        if playerName then
+            table.insert(groupMembers, NormalizeName(playerName))
+            if not NamesOnDiscord_IsKnown(playerName) then
+                local class = UnitClass("player")
+                table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(playerName, class))
+            end
         end
     end
 
+    -- Find Discord members not in group
+    local discordNotInGroup = {}
+    for _, entry in ipairs(NamesOnDiscord_knownPlayers) do
+        local knownName = NormalizeName(entry.username or "")
+        local knownNick = NormalizeName(entry.nickname or "")
+        local knownDisplay = NormalizeName(entry.displayname or "")
+
+        local inGroup = false
+        for _, groupName in ipairs(groupMembers) do
+            if groupName == knownName or groupName == knownNick or groupName == knownDisplay then
+                inGroup = true
+                break
+            end
+        end
+
+        if not inGroup then
+            table.insert(discordNotInGroup, entry.username or entry.displayname or entry.nickname or "Unknown")
+        end
+    end
+
+    -- Output results
     if next(unknownMembers) then
+        local msg = "Members not on Discord: " .. table.concat(unknownMembers, ", ")
+        local discordMsg = "Discord members not in group: " .. table.concat(discordNotInGroup, ", ")
         if IsInRaid() then
-            SendChatMessage("Members not on Discord: " .. table.concat(unknownMembers, ", "), "RAID_WARNING")
+            SendChatMessage(msg, "RAID_WARNING")
             SendChatMessage("Join our Discord: https://discord.gg/3Qmegp9Df7", "RAID_WARNING")
+            SendChatMessage(discordMsg, "RAID_WARNING")
         elseif GetNumPartyMembers() > 0 then
-            SendChatMessage("Members not on Discord: " .. table.concat(unknownMembers, ", "), "PARTY")
+            SendChatMessage(msg, "PARTY")
+            SendChatMessage(discordMsg, "PARTY")
             SendChatMessage("Join our Discord: https://discord.gg/3Qmegp9Df7", "PARTY")
         else
-            DEFAULT_CHAT_FRAME:AddMessage("Members not on Discord: " .. table.concat(unknownMembers, ", "))
+            DEFAULT_CHAT_FRAME:AddMessage(msg)
             DEFAULT_CHAT_FRAME:AddMessage("Join our Discord: https://discord.gg/3Qmegp9Df7")
+            DEFAULT_CHAT_FRAME:AddMessage(discordMsg)
         end
     else
         DEFAULT_CHAT_FRAME:AddMessage("All members are on Discord.")
+        if next(discordNotInGroup) then
+            DEFAULT_CHAT_FRAME:AddMessage("Discord members not in group: " .. table.concat(discordNotInGroup, ", "))
+        end
     end
 end
