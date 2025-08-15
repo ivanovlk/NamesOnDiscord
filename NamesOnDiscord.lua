@@ -55,8 +55,8 @@ local function NamesOnDiscord_IsKnown(name)
             string.sub(normName, 1, 3) == string.sub(knownDisplay, 1, 3)
         ) then
             print(string.format(
-                "Auto-complete suggestion: %s to username: %s, nickname: %s, displayname: %s",
-                name, entry.username or "", entry.nickname or "", entry.displayname or ""
+                "Auto-matched : %s to (%s, %s, %s)",
+                name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
         end
@@ -70,8 +70,8 @@ local function NamesOnDiscord_IsKnown(name)
            string.find(knownDisplay, normName, 1, true)
         then
             print(string.format(
-                "Auto-complete suggestion: %s to username: %s, nickname: %s, displayname: %s",
-                name, entry.username or "", entry.nickname or "", entry.displayname or ""
+                "Auto-matched : %s to (%s, %s, %s)",
+                name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
         end
@@ -82,8 +82,8 @@ local function NamesOnDiscord_IsKnown(name)
            Levenshtein(normName, knownDisplay) <= 3
         then
             print(string.format(
-                "Auto-complete suggestion: %s to username: %s, nickname: %s, displayname: %s",
-                name, entry.username or "", entry.nickname or "", entry.displayname or ""
+                "Auto-matched : %s to (%s, %s, %s)",
+                name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
         end
