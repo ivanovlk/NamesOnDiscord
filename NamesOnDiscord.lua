@@ -41,25 +41,50 @@ local function NamesOnDiscord_IsKnown(name)
     for _, entry in ipairs(NamesOnDiscord_knownPlayers) do
         local knownName = NormalizeName(entry.username or "")
         local knownNick = NormalizeName(entry.nickname or "")
+        local knownDisplay = NormalizeName(entry.displayname or "")
 
         -- Exact match
-        if normName == knownName or normName == knownNick then
+        if normName == knownName or normName == knownNick or normName == knownDisplay then
             return true
         end
 
         -- Prefix match (check length first)
-        if string.len(normName) >= 3 and (string.sub(normName, 1, 3) == string.sub(knownName, 1, 3) or string.sub(normName, 1, 3) == string.sub(knownNick, 1, 3)) then
+        if string.len(normName) >= 3 and (
+            string.sub(normName, 1, 3) == string.sub(knownName, 1, 3) or
+            string.sub(normName, 1, 3) == string.sub(knownNick, 1, 3) or
+            string.sub(normName, 1, 3) == string.sub(knownDisplay, 1, 3)
+        ) then
+            print(string.format(
+                "Auto-complete suggestion: %s to username: %s, nickname: %s, displayname: %s",
+                name, entry.username or "", entry.nickname or "", entry.displayname or ""
+            ))
             return true
         end
 
         -- Substring match
-        if string.find(normName, knownName, 1, true) or string.find(normName, knownNick, 1, true) or
-           string.find(knownName, normName, 1, true) or string.find(knownNick, normName, 1, true) then
+        if string.find(normName, knownName, 1, true) or
+           string.find(normName, knownNick, 1, true) or
+           string.find(normName, knownDisplay, 1, true) or
+           string.find(knownName, normName, 1, true) or
+           string.find(knownNick, normName, 1, true) or
+           string.find(knownDisplay, normName, 1, true)
+        then
+            print(string.format(
+                "Auto-complete suggestion: %s to username: %s, nickname: %s, displayname: %s",
+                name, entry.username or "", entry.nickname or "", entry.displayname or ""
+            ))
             return true
         end
 
         -- Levenshtein distance (typo tolerance)
-        if Levenshtein(normName, knownName) <= 3 or Levenshtein(normName, knownNick) <= 3 then
+        if Levenshtein(normName, knownName) <= 3 or
+           Levenshtein(normName, knownNick) <= 3 or
+           Levenshtein(normName, knownDisplay) <= 3
+        then
+            print(string.format(
+                "Auto-complete suggestion: %s to username: %s, nickname: %s, displayname: %s",
+                name, entry.username or "", entry.nickname or "", entry.displayname or ""
+            ))
             return true
         end
     end
