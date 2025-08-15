@@ -105,6 +105,7 @@ function NamesOnDiscord_CheckGroupMembers()
     NamesOnDiscord_knownPlayers = json.decode( UnitXP( "clientRead", "http://192.168.0.6:5261/api/voice/members/1225934997836402772" ) )
     local unknownMembers = {}
     local groupMembers = {}
+    local normalizedGroupNames = {}
 
     -- Collect normalized group member names
     if IsInRaid() then
@@ -113,7 +114,7 @@ function NamesOnDiscord_CheckGroupMembers()
             if UnitIsPlayer(unit) then
                 local name = GetUnitName(unit, true)
                 if name then
-                    table.insert(groupMembers, NormalizeName(name))
+                    normalizedGroupNames[NormalizeName(name)] = true
                     if not NamesOnDiscord_IsKnown(name) then
                         local class = UnitClass(unit)
                         table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(name, class))
@@ -127,7 +128,7 @@ function NamesOnDiscord_CheckGroupMembers()
             if UnitIsPlayer(unit) then
                 local name = GetUnitName(unit, true)
                 if name then
-                    table.insert(groupMembers, NormalizeName(name))
+                    normalizedGroupNames[NormalizeName(name)] = true
                     if not NamesOnDiscord_IsKnown(name) then
                         local class = UnitClass(unit)
                         table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(name, class))
@@ -138,7 +139,7 @@ function NamesOnDiscord_CheckGroupMembers()
 
         local playerName = UnitName("player")
         if playerName then
-            table.insert(groupMembers, NormalizeName(playerName))
+            normalizedGroupNames[NormalizeName(playerName)] = true
             if not NamesOnDiscord_IsKnown(playerName) then
                 local class = UnitClass("player")
                 table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(playerName, class))
@@ -147,7 +148,7 @@ function NamesOnDiscord_CheckGroupMembers()
     else
         local playerName = UnitName("player")
         if playerName then
-            table.insert(groupMembers, NormalizeName(playerName))
+            normalizedGroupNames[NormalizeName(playerName)] = true
             if not NamesOnDiscord_IsKnown(playerName) then
                 local class = UnitClass("player")
                 table.insert(unknownMembers, NamesOnDiscord_Colorize_Player_By_Class(playerName, class))
@@ -155,47 +156,78 @@ function NamesOnDiscord_CheckGroupMembers()
         end
     end
 
-    -- Find Discord members not in group
+    -- Find Discord members not in group and not automatched
     local discordNotInGroup = {}
     for _, entry in ipairs(NamesOnDiscord_knownPlayers) do
-        local knownName = NormalizeName(entry.username or "")
-        local knownNick = NormalizeName(entry.nickname or "")
-        local knownDisplay = NormalizeName(entry.displayname or "")
+        local normName = NormalizeName(entry.username or "")
+        local normNick = NormalizeName(entry.nickname or "")
+        local normDisplay = NormalizeName(entry.displayname or "")
 
-        local inGroup = false
-        for _, groupName in ipairs(groupMembers) do
-            if groupName == knownName or groupName == knownNick or groupName == knownDisplay then
-                inGroup = true
+        local matched = false
+        for groupNormName, _ in pairs(normalizedGroupNames) do
+            -- Use same automatch logic as NamesOnDiscord_IsKnown
+            if groupNormName == normName or groupNormName == normNick or groupNormName == normDisplay then
+                matched = true
+                break
+            end
+            if string.len(groupNormName) >= 3 and (
+                string.sub(groupNormName, 1, 3) == string.sub(normName, 1, 3) or
+                string.sub(groupNormName, 1, 3) == string.sub(normNick, 1, 3) or
+                string.sub(groupNormName, 1, 3) == string.sub(normDisplay, 1, 3)
+            ) then
+                matched = true
+                break
+            end
+            if string.find(groupNormName, normName, 1, true) or
+               string.find(groupNormName, normNick, 1, true) or
+               string.find(groupNormName, normDisplay, 1, true) or
+               string.find(normName, groupNormName, 1, true) or
+               string.find(normNick, groupNormName, 1, true) or
+               string.find(normDisplay, groupNormName, 1, true)
+            then
+                matched = true
+                break
+            end
+            if Levenshtein(groupNormName, normName) <= 3 or
+               Levenshtein(groupNormName, normNick) <= 3 or
+               Levenshtein(groupNormName, normDisplay) <= 3
+            then
+                matched = true
                 break
             end
         end
 
-        if not inGroup then
-            table.insert(discordNotInGroup, entry.username or entry.displayname or entry.nickname or "Unknown")
+        if not matched then
+            local display = entry.displayname or entry.username or entry.nickname or "Unknown"
+            table.insert(discordNotInGroup, display)
         end
     end
 
     -- Output results
     if next(unknownMembers) then
         local msg = "Members not on Discord: " .. table.concat(unknownMembers, ", ")
-        local discordMsg = "Discord members not in group: " .. table.concat(discordNotInGroup, ", ")
         if IsInRaid() then
             SendChatMessage(msg, "RAID_WARNING")
             SendChatMessage("Join our Discord: https://discord.gg/3Qmegp9Df7", "RAID_WARNING")
-            SendChatMessage(discordMsg, "RAID_WARNING")
         elseif GetNumPartyMembers() > 0 then
             SendChatMessage(msg, "PARTY")
-            SendChatMessage(discordMsg, "PARTY")
             SendChatMessage("Join our Discord: https://discord.gg/3Qmegp9Df7", "PARTY")
         else
             DEFAULT_CHAT_FRAME:AddMessage(msg)
             DEFAULT_CHAT_FRAME:AddMessage("Join our Discord: https://discord.gg/3Qmegp9Df7")
-            DEFAULT_CHAT_FRAME:AddMessage(discordMsg)
         end
     else
         DEFAULT_CHAT_FRAME:AddMessage("All members are on Discord.")
-        if next(discordNotInGroup) then
-            DEFAULT_CHAT_FRAME:AddMessage("Discord members not in group: " .. table.concat(discordNotInGroup, ", "))
+    end
+
+    if next(discordNotInGroup) then
+        local msg = "Discord members not in group: " .. table.concat(discordNotInGroup, ", ")
+        if IsInRaid() then
+            SendChatMessage(msg, "RAID_WARNING")
+        elseif GetNumPartyMembers() > 0 then
+            SendChatMessage(msg, "PARTY")
+        else
+            DEFAULT_CHAT_FRAME:AddMessage(msg)
         end
     end
 end
