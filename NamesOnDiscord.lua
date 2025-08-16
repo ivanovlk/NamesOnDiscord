@@ -40,8 +40,8 @@ local function NamesOnDiscord_IsKnown(name)
     local normName = NormalizeName(name)
     for _, entry in ipairs(NamesOnDiscord_knownPlayers) do
         local knownName = NormalizeName(entry.username or "")
-        local knownNick = NormalizeName(entry.nickname or "")
-        local knownDisplay = NormalizeName(entry.displayname or "")
+        local knownNick = NormalizeName(entry.nickname or entry.username)
+        local knownDisplay = NormalizeName(entry.displayname or entry.username)
 
         -- Exact match
         if normName == knownName or normName == knownNick or normName == knownDisplay then
@@ -55,7 +55,7 @@ local function NamesOnDiscord_IsKnown(name)
             string.sub(normName, 1, 3) == string.sub(knownDisplay, 1, 3)
         ) then
             print(string.format(
-                "Auto-matched : %s to (%s, %s, %s)",
+                "Auto-matched 1: %s to (%s, %s, %s)",
                 name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
@@ -70,19 +70,19 @@ local function NamesOnDiscord_IsKnown(name)
            string.find(knownDisplay, normName, 1, true)
         then
             print(string.format(
-                "Auto-matched : %s to (%s, %s, %s)",
+                "Auto-matched 2: %s to (%s, %s, %s)",
                 name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
         end
 
         -- Levenshtein distance (typo tolerance)
-        if Levenshtein(normName, knownName) <= 3 or
-           Levenshtein(normName, knownNick) <= 3 or
-           Levenshtein(normName, knownDisplay) <= 3
+        if Levenshtein(normName, knownName) <= 2 or
+           Levenshtein(normName, knownNick) <= 2 or
+           Levenshtein(normName, knownDisplay) <= 2
         then
             print(string.format(
-                "Auto-matched : %s to (%s, %s, %s)",
+                "Auto-matched 3: %s to (%s, %s, %s)",
                 name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
@@ -160,8 +160,8 @@ function NamesOnDiscord_CheckGroupMembers()
     local discordNotInGroup = {}
     for _, entry in ipairs(NamesOnDiscord_knownPlayers) do
         local normName = NormalizeName(entry.username or "")
-        local normNick = NormalizeName(entry.nickname or "")
-        local normDisplay = NormalizeName(entry.displayname or "")
+        local normNick = NormalizeName(entry.nickname or entry.username)
+        local normDisplay = NormalizeName(entry.displayname or entry.username)
 
         local matched = false
         for groupNormName, _ in pairs(normalizedGroupNames) do
@@ -188,9 +188,9 @@ function NamesOnDiscord_CheckGroupMembers()
                 matched = true
                 break
             end
-            if Levenshtein(groupNormName, normName) <= 3 or
-               Levenshtein(groupNormName, normNick) <= 3 or
-               Levenshtein(groupNormName, normDisplay) <= 3
+            if Levenshtein(groupNormName, normName) <= 2 or
+               Levenshtein(groupNormName, normNick) <= 2 or
+               Levenshtein(groupNormName, normDisplay) <= 2
             then
                 matched = true
                 break
