@@ -55,7 +55,7 @@ local function NamesOnDiscord_IsKnown(name)
             string.sub(normName, 1, 3) == string.sub(knownDisplay, 1, 3)
         ) then
             print(string.format(
-                "Auto-matched 1: %s to (%s, %s, %s)",
+                "Auto-matched method 1a: %s to (%s, %s, %s)",
                 name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
@@ -70,7 +70,7 @@ local function NamesOnDiscord_IsKnown(name)
            string.find(knownDisplay, normName, 1, true)
         then
             print(string.format(
-                "Auto-matched 2: %s to (%s, %s, %s)",
+                "Auto-matched method 2a: %s to (%s, %s, %s)",
                 name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
@@ -82,7 +82,7 @@ local function NamesOnDiscord_IsKnown(name)
            Levenshtein(normName, knownDisplay) <= 2
         then
             print(string.format(
-                "Auto-matched 3: %s to (%s, %s, %s)",
+                "Auto-matched method 3a: %s to (%s, %s, %s)",
                 name, entry.username or "", entry.displayname or "", entry.nickname or ""
             ))
             return true
@@ -175,6 +175,10 @@ function NamesOnDiscord_CheckGroupMembers()
                 string.sub(groupNormName, 1, 3) == string.sub(normNick, 1, 3) or
                 string.sub(groupNormName, 1, 3) == string.sub(normDisplay, 1, 3)
             ) then
+                print(string.format(
+                    "Auto-matched method 1b: %s to %s, %s, %s)",
+                    groupNormName, entry.username or "", entry.displayname or "", entry.nickname or ""
+                ))
                 matched = true
                 break
             end
@@ -185,6 +189,10 @@ function NamesOnDiscord_CheckGroupMembers()
                string.find(normNick, groupNormName, 1, true) or
                string.find(normDisplay, groupNormName, 1, true)
             then
+                print(string.format(
+                    "Auto-matched method 2b: %s to %s, %s, %s)",
+                    groupNormName, entry.username or "", entry.displayname or "", entry.nickname or ""
+                ))
                 matched = true
                 break
             end
@@ -192,6 +200,10 @@ function NamesOnDiscord_CheckGroupMembers()
                Levenshtein(groupNormName, normNick) <= 2 or
                Levenshtein(groupNormName, normDisplay) <= 2
             then
+                print(string.format(
+                    "Auto-matched method 3b: %s to %s, %s, %s)",
+                    groupNormName, entry.username or "", entry.displayname or "", entry.nickname or ""
+                ))
                 matched = true
                 break
             end
