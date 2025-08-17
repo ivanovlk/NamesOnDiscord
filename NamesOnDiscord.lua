@@ -49,10 +49,10 @@ local function NamesOnDiscord_IsKnown(name)
         end
 
         -- Prefix match (check length first)
-        if string.len(normName) >= 3 and (
-            string.sub(normName, 1, 3) == string.sub(knownName, 1, 3) or
-            string.sub(normName, 1, 3) == string.sub(knownNick, 1, 3) or
-            string.sub(normName, 1, 3) == string.sub(knownDisplay, 1, 3)
+        if string.len(normName) >= 4 and (
+            string.sub(normName, 1, 4) == string.sub(knownName, 1, 4) or
+            string.sub(normName, 1, 4) == string.sub(knownNick, 1, 4) or
+            string.sub(normName, 1, 4) == string.sub(knownDisplay, 1, 4)
         ) then
             print(string.format(
                 "Auto-matched method 1a: %s to (%s, %s, %s)",
@@ -170,10 +170,10 @@ function NamesOnDiscord_CheckGroupMembers()
                 matched = true
                 break
             end
-            if string.len(groupNormName) >= 3 and (
-                string.sub(groupNormName, 1, 3) == string.sub(normName, 1, 3) or
-                string.sub(groupNormName, 1, 3) == string.sub(normNick, 1, 3) or
-                string.sub(groupNormName, 1, 3) == string.sub(normDisplay, 1, 3)
+            if string.len(groupNormName) >= 4 and (
+                string.sub(groupNormName, 1, 4) == string.sub(normName, 1, 4) or
+                string.sub(groupNormName, 1, 4) == string.sub(normNick, 1, 4) or
+                string.sub(groupNormName, 1, 4) == string.sub(normDisplay, 1, 4)
             ) then
                 print(string.format(
                     "Auto-matched method 1b: %s to %s, %s, %s)",
