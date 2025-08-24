@@ -215,17 +215,37 @@ function NamesOnDiscord_CheckGroupMembers()
         end
     end
 
+    local function tableCount(t)
+        local count = 0
+        for _ in pairs(t) do count = count + 1 end
+        return count
+    end
+
     -- Output results
     if next(unknownMembers) then
-        local msg = "Members not on Discord: " .. table.concat(unknownMembers, ", ")
+        local msgParts = {}
+        local unknownCount = tableCount(unknownMembers)
+        for i = 1, unknownCount, 9 do
+            local chunk = {}
+            for j = i, math.min(i+8, unknownCount) do
+                table.insert(chunk, unknownMembers[j])
+            end
+            table.insert(msgParts, "Members not on Discord: " .. table.concat(chunk, ", "))
+        end
         if IsInRaid() then
-            SendChatMessage(msg, "RAID_WARNING")
+            for _, part in ipairs(msgParts) do
+                SendChatMessage(part, "RAID_WARNING")
+            end
             SendChatMessage("Join our Discord: https://discord.gg/3Qmegp9Df7", "RAID_WARNING")
         elseif GetNumPartyMembers() > 0 then
-            SendChatMessage(msg, "PARTY")
+            for _, part in ipairs(msgParts) do
+                SendChatMessage(part, "PARTY")
+            end
             SendChatMessage("Join our Discord: https://discord.gg/3Qmegp9Df7", "PARTY")
         else
-            DEFAULT_CHAT_FRAME:AddMessage(msg)
+            for _, part in ipairs(msgParts) do
+                DEFAULT_CHAT_FRAME:AddMessage(part)
+            end
             DEFAULT_CHAT_FRAME:AddMessage("Join our Discord: https://discord.gg/3Qmegp9Df7")
         end
     else
@@ -233,13 +253,27 @@ function NamesOnDiscord_CheckGroupMembers()
     end
 
     if next(discordNotInGroup) then
-        local msg = "Discord members not in group: " .. table.concat(discordNotInGroup, ", ")
+        local msgParts = {}
+        local discordCount = tableCount(discordNotInGroup)
+        for i = 1, discordCount, 9 do
+            local chunk = {}
+            for j = i, math.min(i+8, discordCount) do
+                table.insert(chunk, discordNotInGroup[j])
+            end
+            table.insert(msgParts, "Discord members not in group: " .. table.concat(chunk, ", "))
+        end
         if IsInRaid() then
-            SendChatMessage(msg, "RAID_WARNING")
+            for _, part in ipairs(msgParts) do
+                SendChatMessage(part, "RAID_WARNING")
+            end
         elseif GetNumPartyMembers() > 0 then
-            SendChatMessage(msg, "PARTY")
+            for _, part in ipairs(msgParts) do
+                SendChatMessage(part, "PARTY")
+            end
         else
-            DEFAULT_CHAT_FRAME:AddMessage(msg)
+            for _, part in ipairs(msgParts) do
+                DEFAULT_CHAT_FRAME:AddMessage(part)
+            end
         end
     end
 end
