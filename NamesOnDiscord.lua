@@ -230,7 +230,11 @@ function NamesOnDiscord_CheckGroupMembers()
             for j = i, math.min(i+8, unknownCount) do
                 table.insert(chunk, unknownMembers[j])
             end
-            table.insert(msgParts, "Members not on Discord: " .. table.concat(chunk, ", "))
+            if i == 1 then
+                table.insert(msgParts, "Members not on Discord: " .. table.concat(chunk, ", "))
+            else
+                table.insert(msgParts, table.concat(chunk, ", "))
+            end
         end
         if IsInRaid() then
             for _, part in ipairs(msgParts) do
@@ -260,7 +264,11 @@ function NamesOnDiscord_CheckGroupMembers()
             for j = i, math.min(i+8, discordCount) do
                 table.insert(chunk, discordNotInGroup[j])
             end
-            table.insert(msgParts, "Discord members not in group: " .. table.concat(chunk, ", "))
+            if i == 1 then
+                table.insert(msgParts, "Discord members not in group: " .. table.concat(chunk, ", "))
+            else
+                table.insert(msgParts, table.concat(chunk, ", "))
+            end
         end
         if IsInRaid() then
             for _, part in ipairs(msgParts) do
