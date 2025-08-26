@@ -62,12 +62,12 @@ local function NamesOnDiscord_IsKnown(name)
         end
 
         -- Substring match
-        if string.find(normName, knownName, 1, true) or
-           string.find(normName, knownNick, 1, true) or
-           string.find(normName, knownDisplay, 1, true) or
-           string.find(knownName, normName, 1, true) or
-           string.find(knownNick, normName, 1, true) or
-           string.find(knownDisplay, normName, 1, true)
+    if (string.len(knownName) >= 4 and string.len(normName) >= 4 and string.find(normName, knownName, 1, true)) or
+        (string.len(knownNick) >= 4 and string.len(normName) >= 4 and string.find(normName, knownNick, 1, true)) or
+        (string.len(knownDisplay) >= 4 and string.len(normName) >= 4 and string.find(normName, knownDisplay, 1, true)) or
+        (string.len(normName) >= 4 and string.len(knownName) >= 4 and string.find(knownName, normName, 1, true)) or
+        (string.len(normName) >= 4 and string.len(knownNick) >= 4 and string.find(knownNick, normName, 1, true)) or
+        (string.len(normName) >= 4 and string.len(knownDisplay) >= 4 and string.find(knownDisplay, normName, 1, true))
         then
             print(string.format(
                 "Auto-matched method 2a: %s to (%s, %s, %s)",
@@ -182,12 +182,12 @@ function NamesOnDiscord_CheckGroupMembers()
                 matched = true
                 break
             end
-            if string.find(groupNormName, normName, 1, true) or
-               string.find(groupNormName, normNick, 1, true) or
-               string.find(groupNormName, normDisplay, 1, true) or
-               string.find(normName, groupNormName, 1, true) or
-               string.find(normNick, groupNormName, 1, true) or
-               string.find(normDisplay, groupNormName, 1, true)
+                if (string.len(groupNormName) >= 4 and string.len(normName) >= 4 and string.find(groupNormName, normName, 1, true)) or
+                    (string.len(groupNormName) >= 4 and string.len(normNick) >= 4 and string.find(groupNormName, normNick, 1, true)) or
+                    (string.len(groupNormName) >= 4 and string.len(normDisplay) >= 4 and string.find(groupNormName, normDisplay, 1, true)) or
+                    (string.len(normName) >= 4 and string.len(groupNormName) >= 4 and string.find(normName, groupNormName, 1, true)) or
+                    (string.len(normNick) >= 4 and string.len(groupNormName) >= 4 and string.find(normNick, groupNormName, 1, true)) or
+                    (string.len(normDisplay) >= 4 and string.len(groupNormName) >= 4 and string.find(normDisplay, groupNormName, 1, true))
             then
                 print(string.format(
                     "Auto-matched method 2b: %s to %s, %s, %s)",
