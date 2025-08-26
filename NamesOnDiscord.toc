@@ -1,8 +1,9 @@
 ## Interface: 11200
 ## Title: NamesOnDiscord
 ## Author: ivanovlk
-## Version: 1.01
+## Version: 1.02
 ## Notes: Checks party/raid members against a name/nickname table
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
+
 NamesOnDiscord.lua
